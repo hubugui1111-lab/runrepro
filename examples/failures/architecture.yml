@@ -1,0 +1,10 @@
+name: Architecture failure
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enforce ARM64-only binary
+        run: test "$(uname -m)" = "aarch64"

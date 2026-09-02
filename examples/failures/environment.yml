@@ -1,0 +1,13 @@
+name: Environment failure
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    env:
+      EXPECTED_ENVIRONMENT: production
+      ACTUAL_ENVIRONMENT: staging
+    steps:
+      - name: Verify environment contract
+        run: test "$ACTUAL_ENVIRONMENT" = "$EXPECTED_ENVIRONMENT"

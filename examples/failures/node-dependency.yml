@@ -1,0 +1,13 @@
+name: Node dependency failure
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+      - name: Require undeclared Node package
+        run: node -e "require('runrepro-demo-missing')"

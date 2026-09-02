@@ -1,0 +1,15 @@
+name: Service container failure
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+    steps:
+      - name: Probe Redis with HTTP by mistake
+        run: curl --fail --max-time 3 http://127.0.0.1:6379/health

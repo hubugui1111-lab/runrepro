@@ -1,0 +1,10 @@
+name: Filesystem failure
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify generated schema exists
+        run: test -f generated/schema.json

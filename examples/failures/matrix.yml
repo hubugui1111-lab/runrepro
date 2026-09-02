@@ -1,0 +1,16 @@
+name: Matrix failure
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  compatibility:
+    name: compatibility (${{ matrix.runtime }}, ${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        runtime: ["20", "24"]
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Enforce supported runtime
+        run: test "${{ matrix.runtime }}" = "20"

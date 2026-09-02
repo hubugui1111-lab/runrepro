@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+      - name: Install locked dependencies
+        run: uv sync --locked
+      - name: Formatting
+        run: uv run ruff format --check .
+      - name: Lint
+        run: uv run ruff check .
+      - name: Type check
+        run: uv run mypy src
+      - name: Unit and CLI tests
+        run: uv run pytest -m "not integration" --no-cov
+      - name: Integration tests
+        run: uv run pytest -m integration --no-cov
+      - name: Full suite and coverage gate
+        run: uv run pytest
+      - name: Dependency vulnerability audit
+        run: uv run pip-audit
+      - name: Build distributions
+        run: uv build
+      - name: Verify wheel installation and CLI
+        run: |
+          uv venv .package-venv --python 3.13
+          uv pip install --python .package-venv/bin/python dist/*.whl
+          .package-venv/bin/runrepro --help
+      - uses: actions/upload-artifact@v7
+        with:
+          name: runrepro-dist
+          path: dist/
+          if-no-files-found: error

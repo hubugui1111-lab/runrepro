@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
+  <title id="title">RunRepro terminal demonstration</title>
+  <desc id="desc">A failed GitHub Actions run becomes a safe bundle and the same failed step is reproduced locally.</desc>
+  <rect width="1200" height="520" rx="24" fill="#0d1117"/>
+  <rect x="1" y="1" width="1198" height="518" rx="23" fill="none" stroke="#30363d" stroke-width="2"/>
+  <circle cx="42" cy="38" r="8" fill="#ff5f56"/><circle cx="68" cy="38" r="8" fill="#ffbd2e"/><circle cx="94" cy="38" r="8" fill="#27c93f"/>
+  <text x="600" y="44" text-anchor="middle" fill="#8b949e" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="18">runrepro — reproduce when possible, explain the delta when not</text>
+  <g font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="23">
+    <text x="50" y="105" fill="#f85149">CI  ✗  Verify environment contract</text>
+    <text x="50" y="155" fill="#58a6ff">$ runrepro pull https://github.com/acme/widgets/actions/runs/424242</text>
+    <text x="50" y="195" fill="#c9d1d9">Bundle ready: .runrepro</text>
+    <text x="50" y="245" fill="#58a6ff">$ runrepro inspect</text>
+    <text x="50" y="285" fill="#c9d1d9">Replay job: replay-demo   Matrix: {"os": "ubuntu-latest"}</text>
+    <text x="50" y="335" fill="#58a6ff">$ runrepro replay</text>
+    <text x="50" y="375" fill="#f85149">Failure - Verify environment contract</text>
+    <text x="50" y="425" fill="#3fb950">RunRepro outcome: REPRODUCED</text>
+    <text x="50" y="475" fill="#8b949e">No token persisted · no ambient secrets · explicit fidelity deltas</text>
+  </g>
+</svg>

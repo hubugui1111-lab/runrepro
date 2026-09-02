@@ -68,6 +68,7 @@ def test_build_act_plan_blocks_ambient_secrets_host_network_and_docker_socket(
     assert argv[argv.index("--env-file") + 1].endswith("replay.env")
     assert argv[argv.index("--var-file") + 1].endswith(".empty")
     assert argv[argv.index("--input-file") + 1].endswith(".empty")
+    assert argv[argv.index("--platform") + 1] == "ubuntu-latest=ubuntu:24.04"
     assert "--privileged" not in argv
     assert "--bind" not in argv
     assert not any("token" in item.lower() for item in argv)

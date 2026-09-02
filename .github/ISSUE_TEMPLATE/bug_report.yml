@@ -1,0 +1,41 @@
+name: Bug report
+description: Report a reproducible RunRepro defect (never include credentials or private logs).
+title: "bug: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Security vulnerabilities belong in a private security advisory, not this form.
+  - type: input
+    id: version
+    attributes:
+      label: RunRepro version
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options: [Linux, macOS, Windows, Other]
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Use a public run URL or a synthetic fixture. Remove all secrets and private data.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true

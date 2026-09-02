@@ -1,0 +1,37 @@
+name: RunRepro intentional failure demo
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  replay-demo:
+    name: replay-demo (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+    env:
+      EXPECTED_ENVIRONMENT: production
+      ACTUAL_ENVIRONMENT: staging
+    steps:
+      - name: Record portable runner evidence
+        shell: bash
+        run: |
+          echo "RUNREPRO_TOOL bash=${BASH_VERSION}"
+          echo "This workflow is expected to fail for the public RunRepro demo."
+      - name: Verify environment contract
+        shell: bash
+        run: |
+          echo "expected=${EXPECTED_ENVIRONMENT}"
+          echo "actual=${ACTUAL_ENVIRONMENT}"
+          test "${ACTUAL_ENVIRONMENT}" = "${EXPECTED_ENVIRONMENT}"

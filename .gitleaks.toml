@@ -1,0 +1,16 @@
+title = "RunRepro secret scanning"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Generated and dependency directories are never committed"
+paths = [
+  '''(^|/)\.venv/''',
+  '''(^|/)dist/''',
+  '''(^|/)build/''',
+  '''(^|/)\.git/''',
+  '''(^|/)\.pytest_cache/''',
+  '''(^|/)\.mypy_cache/''',
+  '''(^|/)\.ruff_cache/''',
+]

@@ -66,6 +66,14 @@ def build_act_plan(
     ]
     for key, value in sorted(lock.replay.matrix.items()):
         argv.extend(("--matrix", f"{key}:{value}"))
+    runner_labels = {
+        label
+        for job in lock.jobs
+        if job.conclusion in {"failure", "timed_out", "cancelled"}
+        for label in job.runner_labels
+    }
+    for label, image in _portable_runner_images(runner_labels):
+        argv.extend(("--platform", f"{label}={image}"))
     argv.extend(
         (
             "--network",
@@ -87,6 +95,15 @@ def build_act_plan(
     if offline:
         argv.extend(("--action-offline-mode", "--pull=false"))
     return ActPlan(argv=argv, bundle=root)
+
+
+def _portable_runner_images(labels: set[str]) -> list[tuple[str, str]]:
+    mappings = {
+        "ubuntu-latest": "ubuntu:24.04",
+        "ubuntu-24.04": "ubuntu:24.04",
+        "ubuntu-22.04": "ubuntu:22.04",
+    }
+    return [(label, mappings[label]) for label in sorted(labels) if label in mappings]
 
 
 def run_act(
