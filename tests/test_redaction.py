@@ -35,4 +35,3 @@ def test_redactor_accepts_bytes_and_replaces_invalid_utf8() -> None:
 
     assert value.startswith("ok")
     assert "unsafe" not in value
-

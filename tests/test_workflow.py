@@ -30,7 +30,9 @@ def test_analyze_workflow_selects_failed_job_and_static_matrix(workflow_text: st
 def test_analyze_workflow_rejects_ambiguous_failed_job(workflow_text: str) -> None:
     ambiguous = workflow_text.replace(
         "  lint:\n    runs-on: ubuntu-latest",
-        "  lint:\n    name: test (${{ matrix.python }}, ${{ matrix.os }})\n    runs-on: ubuntu-latest",
+        "  lint:\n"
+        "    name: test (${{ matrix.python }}, ${{ matrix.os }})\n"
+        "    runs-on: ubuntu-latest",
     )
 
     with pytest.raises(WorkflowAnalysisError, match="ambiguous"):
@@ -39,4 +41,3 @@ def test_analyze_workflow_rejects_ambiguous_failed_job(workflow_text: str) -> No
             failed_job_name="test (3.12, ubuntu-latest)",
             runner_labels=["ubuntu-latest"],
         )
-

@@ -51,7 +51,12 @@ def github_payloads() -> dict[str, Any]:
                     "started_at": "2026-09-01T10:00:10Z",
                     "completed_at": "2026-09-01T10:01:00Z",
                     "steps": [
-                        {"name": "Lint", "number": 1, "status": "completed", "conclusion": "success"}
+                        {
+                            "name": "Lint",
+                            "number": 1,
+                            "status": "completed",
+                            "conclusion": "success",
+                        }
                     ],
                 },
                 {
@@ -65,9 +70,24 @@ def github_payloads() -> dict[str, Any]:
                     "started_at": "2026-09-01T10:00:10Z",
                     "completed_at": "2026-09-01T10:02:00Z",
                     "steps": [
-                        {"name": "Checkout", "number": 1, "status": "completed", "conclusion": "success"},
-                        {"name": "Install dependencies", "number": 2, "status": "completed", "conclusion": "success"},
-                        {"name": "Run tests", "number": 3, "status": "completed", "conclusion": "failure"},
+                        {
+                            "name": "Checkout",
+                            "number": 1,
+                            "status": "completed",
+                            "conclusion": "success",
+                        },
+                        {
+                            "name": "Install dependencies",
+                            "number": 2,
+                            "status": "completed",
+                            "conclusion": "success",
+                        },
+                        {
+                            "name": "Run tests",
+                            "number": 3,
+                            "status": "completed",
+                            "conclusion": "failure",
+                        },
                     ],
                 },
             ],
@@ -129,4 +149,3 @@ jobs:
 @pytest.fixture
 def copy_payloads(github_payloads: dict[str, Any]) -> Callable[[], dict[str, Any]]:
     return lambda: deepcopy(github_payloads)
-

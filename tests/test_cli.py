@@ -3,7 +3,6 @@ from typer.testing import CliRunner
 
 from runrepro.cli import app
 
-
 runner = CliRunner()
 
 

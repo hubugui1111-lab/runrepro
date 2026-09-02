@@ -47,4 +47,3 @@ def test_compare_environments_marks_mismatch_match_and_unknown() -> None:
     assert by_field["container_image"].status == "unknown"
     assert report.replay_equivalent is False
     assert any("tool versions" in limitation.lower() for limitation in report.limitations)
-

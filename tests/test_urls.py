@@ -34,4 +34,3 @@ def test_parse_run_url_accepts_canonical_variants(url: str, attempt: int | None)
 def test_parse_run_url_rejects_non_run_or_unsafe_urls(url: str) -> None:
     with pytest.raises(InvalidRunURLError):
         parse_run_url(url)
-

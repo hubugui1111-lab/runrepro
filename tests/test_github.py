@@ -32,7 +32,10 @@ class FakeTransport:
         if endpoint.endswith("/actions/jobs/100/logs"):
             return b"lint passed"
         if endpoint.endswith("/actions/jobs/101/logs"):
-            return b"Runner Image\nImage: ubuntu-24.04\nVersion: 20260824.1\nArchitecture: X64\nRun tests\nfailed"
+            return (
+                b"Runner Image\nImage: ubuntu-24.04\nVersion: 20260824.1\n"
+                b"Architecture: X64\nRun tests\nfailed"
+            )
         raise AssertionError(f"unexpected bytes endpoint: {endpoint}")
 
 
@@ -56,4 +59,3 @@ def test_client_fetches_exact_attempt_workflow_logs_and_artifact_metadata(
     assert any(
         endpoint.endswith("/actions/jobs/101/logs") for endpoint, _ in transport.byte_requests
     )
-

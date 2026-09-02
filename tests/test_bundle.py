@@ -48,12 +48,15 @@ def test_build_bundle_writes_stable_relative_secret_safe_files(
     assert token not in (bundle / "logs" / "101.log").read_text(encoding="utf-8")
     assert (bundle / ".empty").read_bytes() == b""
     assert (bundle / "replay.env").read_text(encoding="utf-8") == "CI=true\nGITHUB_ACTIONS=true\n"
-    assert json.loads((bundle / "event.json").read_text(encoding="utf-8"))["repository"][
-        "full_name"
-    ] == "acme/widgets"
+    assert (
+        json.loads((bundle / "event.json").read_text(encoding="utf-8"))["repository"]["full_name"]
+        == "acme/widgets"
+    )
 
 
-def test_build_bundle_refuses_to_overwrite(tmp_path: Path, github_payloads: dict[str, Any], workflow_text: str) -> None:
+def test_build_bundle_refuses_to_overwrite(
+    tmp_path: Path, github_payloads: dict[str, Any], workflow_text: str
+) -> None:
     target = tmp_path / "bundle"
     target.mkdir()
 
@@ -87,4 +90,3 @@ def test_replay_lock_rejects_secret_named_metadata(github_payloads: dict[str, An
 
     with pytest.raises(ValidationError, match="sensitive"):
         ReplayLock.model_validate(invalid)
-

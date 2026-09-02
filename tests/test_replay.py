@@ -33,7 +33,11 @@ def _lock() -> ReplayLock:
             ],
             "artifacts": [],
             "event": {"repository": {"full_name": "acme/widgets"}},
-            "remote_environment": {"os": "Linux", "architecture": "X64", "runner_labels": ["ubuntu-latest"]},
+            "remote_environment": {
+                "os": "Linux",
+                "architecture": "X64",
+                "runner_labels": ["ubuntu-latest"],
+            },
             "replay": {
                 "job_id": "test",
                 "matrix": {"python": "3.12", "os": "ubuntu-latest"},
@@ -45,7 +49,9 @@ def _lock() -> ReplayLock:
     )
 
 
-def test_build_act_plan_blocks_ambient_secrets_host_network_and_docker_socket(tmp_path: Path) -> None:
+def test_build_act_plan_blocks_ambient_secrets_host_network_and_docker_socket(
+    tmp_path: Path,
+) -> None:
     bundle = tmp_path / "bundle"
     bundle.mkdir()
     plan = build_act_plan(_lock(), bundle, act_executable="act")
@@ -82,4 +88,3 @@ def test_classify_act_result_distinguishes_expected_failure_success_and_runner_e
         classify_act_result(1, "Cannot connect to the Docker daemon", ["Run tests"])
         == ReplayOutcome.REPLAY_ERROR
     )
-
