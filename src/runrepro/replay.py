@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import shutil
 import subprocess
+import uuid
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
@@ -32,6 +33,8 @@ class ReplayOutcome(StrEnum):
 class ActPlan:
     argv: list[str]
     bundle: Path
+    network_name: str
+    network_internal: bool
 
 
 @dataclass(frozen=True, slots=True)
@@ -51,7 +54,7 @@ def build_act_plan(
 ) -> ActPlan:
     """Create a no-shell argument vector with explicit safe defaults."""
     root = bundle.resolve()
-    network = "none" if offline else "bridge"
+    network = f"runrepro-{lock.run.id}-{uuid.uuid4().hex[:10]}"
     argv = [
         act_executable,
         lock.replay.event,
@@ -90,11 +93,17 @@ def build_act_plan(
             str(root / ".empty"),
             "--container-options",
             "--cpus 2 --memory 4g --pids-limit 512 --security-opt no-new-privileges:true",
+            "--rm",
         )
     )
     if offline:
         argv.extend(("--action-offline-mode", "--pull=false"))
-    return ActPlan(argv=argv, bundle=root)
+    return ActPlan(
+        argv=argv,
+        bundle=root,
+        network_name=network,
+        network_internal=offline,
+    )
 
 
 def _portable_runner_images(labels: set[str]) -> list[tuple[str, str]]:
@@ -110,6 +119,34 @@ def run_act(
     plan: ActPlan, expected_failed_steps: list[str], *, timeout_seconds: int
 ) -> ReplayResult:
     """Execute a previously constructed plan without a shell."""
+    docker_executable = shutil.which("docker")
+    if docker_executable is None:
+        raise ReplayError("`docker` was not found on PATH")
+    create_network = [docker_executable, "network", "create", "--driver", "bridge"]
+    if plan.network_internal:
+        create_network.append("--internal")
+    create_network.append(plan.network_name)
+    network_result = _run_process(create_network, cwd=plan.bundle, timeout_seconds=30)
+    if network_result.returncode != 0:
+        detail = (
+            SecretRedactor().redact_bytes(network_result.stdout + network_result.stderr).strip()
+        )
+        raise ReplayError(f"could not create isolated Docker network: {detail}")
+
+    try:
+        result = _execute_act(plan, expected_failed_steps, timeout_seconds=timeout_seconds)
+    finally:
+        _run_process(
+            [docker_executable, "network", "rm", plan.network_name],
+            cwd=plan.bundle,
+            timeout_seconds=30,
+        )
+    return result
+
+
+def _execute_act(
+    plan: ActPlan, expected_failed_steps: list[str], *, timeout_seconds: int
+) -> ReplayResult:
     executable = plan.argv[0]
     if executable == "act":
         resolved = shutil.which(executable)
@@ -119,13 +156,7 @@ def run_act(
     else:
         argv = plan.argv
     try:
-        completed = subprocess.run(  # noqa: S603
-            argv,
-            cwd=plan.bundle,
-            check=False,
-            capture_output=True,
-            timeout=timeout_seconds,
-        )
+        completed = _run_process(argv, cwd=plan.bundle, timeout_seconds=timeout_seconds)
     except subprocess.TimeoutExpired as exc:
         partial = (exc.stdout or b"") + (exc.stderr or b"")
         output = SecretRedactor().redact_bytes(partial)
@@ -139,6 +170,18 @@ def run_act(
         returncode=completed.returncode,
         output=output,
         argv=plan.argv,
+    )
+
+
+def _run_process(
+    argv: list[str], *, cwd: Path, timeout_seconds: int
+) -> subprocess.CompletedProcess[bytes]:
+    return subprocess.run(  # noqa: S603
+        argv,
+        cwd=cwd,
+        check=False,
+        capture_output=True,
+        timeout=timeout_seconds,
     )
 
 

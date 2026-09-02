@@ -35,7 +35,7 @@ pull ── validate ── redact ── replay bundle
 
 The generated `act` argument vector:
 
-- uses a bridge network (`none` with `--offline`) rather than host networking;
+- creates a fresh user-defined bridge rather than host or Docker's alias-incompatible default bridge (`--offline` makes that network internal-only);
 - passes explicit empty secret, variable, and input files;
 - passes only `CI=true` and `GITHUB_ACTIONS=true` from `replay.env`;
 - disables the Docker daemon socket inside job containers;

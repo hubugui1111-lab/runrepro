@@ -63,7 +63,7 @@ Failure - Verify environment contract
 RunRepro outcome: REPRODUCED
 ```
 
-Try the repository's deliberately failing [public demo workflow](.github/workflows/demo-failure.yml), or follow the one-command [demo guide](docs/demo.md).
+Try the deliberately failing [public demo run](https://github.com/hubugui1111-lab/runrepro/actions/runs/33648789756), inspect its [workflow](.github/workflows/demo-failure.yml), or follow the one-command [demo guide](docs/demo.md). The checked-in [verified transcript](assets/demo-transcript.txt) shows the same run reaching `REPRODUCED` locally.
 
 ## Why
 
@@ -84,7 +84,7 @@ RunRepro preserves the incident first:
 - **Secret-aware persistence** — honors `::add-mask::`, scrubs common token/credential forms, and rejects secret-like lock metadata.
 - **Static matrix inference** — maps rendered job names back to deterministic matrix values.
 - **Honest environment diff** — labels every compared fact `MATCH`, `MISMATCH`, or `UNKNOWN`.
-- **Safe-by-default `act` plan** — empty secret/var/input files, allowlisted env, bridge networking, no job-container Docker socket, no privileged mode, and bounded resources.
+- **Safe-by-default `act` plan** — empty secret/var/input files, allowlisted env, an isolated per-replay network, no job-container Docker socket, no privileged mode, and bounded resources.
 - **Scriptable outcomes** — stable exit codes distinguish a reproduced failure, a non-reproduction, bad input, API failure, bundle failure, and runner failure.
 
 ## How it works
@@ -139,7 +139,7 @@ Exit codes:
 | `5` | bundle or source preparation failure |
 | `6` | Docker/`act` runner failure |
 
-`--offline` disables job networking and image pulls. It succeeds only when all required runner images and actions are already cached.
+`--offline` uses an internal-only Docker network and disables image pulls. It succeeds only when all required runner images and actions are already cached.
 
 ## Failure gallery
 

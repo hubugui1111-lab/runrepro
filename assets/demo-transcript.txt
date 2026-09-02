@@ -1,0 +1,21 @@
+$ runrepro pull https://github.com/hubugui1111-lab/runrepro/actions/runs/33648789756
+Bundle ready: .runrepro
+
+$ runrepro inspect
+Run: https://github.com/hubugui1111-lab/runrepro/actions/runs/33648789756
+Commit: 0ba7d4c76b886d0a4e8fb95430de3d089ef101c8
+Workflow: RunRepro intentional failure demo (workflow/demo-failure.yml)
+Replay job: replay-demo
+Matrix: {"os": "ubuntu-latest"}
+Failed steps: Verify environment contract
+Services: none
+
+$ runrepro replay
+RUNREPRO_TOOL bash=5.2.21(1)-release
+expected=production
+actual=staging
+Failure - Main Verify environment contract
+RunRepro outcome: REPRODUCED
+
+# Verified on 2026-09-02 with RunRepro 0.1.0, act 0.2.89,
+# Docker Desktop 4.89.0 / Engine 29.7.2. Exit code: 0.

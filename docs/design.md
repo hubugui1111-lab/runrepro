@@ -6,7 +6,7 @@
 2. `runrepro pull <url>` creates `.runrepro/replay.lock`, a minimal event file, sanitized job logs, the pinned workflow, and a disposable exact-commit checkout. Existing bundles are never overwritten without an explicit force flag.
 3. `runrepro inspect` explains the source run and the selected failure without executing untrusted workflow code.
 4. `runrepro diff` compares remote evidence with the local host and labels every field as match, mismatch, or unknown. Missing historical event, matrix, image, or tool data is an explicit fidelity delta.
-5. `runrepro replay` invokes `act` as an argument vector, never through a shell. It uses the pinned workflow/job/event/matrix, a bridge network instead of host networking, bounded container resources, an empty secret file, an allowlisted env file, and no Docker socket by default.
+5. `runrepro replay` invokes `act` as an argument vector, never through a shell. It uses the pinned workflow/job/event/matrix, a per-replay user-defined bridge instead of host networking, bounded container resources, an empty secret file, an allowlisted env file, and no Docker socket by default.
 6. A matching local failed step is `REPRODUCED`; an unexpectedly successful workflow is `NOT_REPRODUCED`; runner/setup failure is `REPLAY_ERROR`. Automation receives deterministic exit codes.
 
 ## Bundle layout
@@ -49,4 +49,3 @@
 ## Known fidelity boundaries
 
 GitHub's historical REST response does not contain the original full webhook payload, resolved dynamic matrix, runner image filesystem, all preinstalled tool versions, OIDC identity, or secret values. Docker/`act` is not a GitHub-hosted VM. Windows and macOS hosted jobs, hardware-specific jobs, nested virtualization, privileged Docker workflows, private service dependencies, and unsupported actions may remain unreproducible. Every such delta is surfaced rather than silently approximated.
-

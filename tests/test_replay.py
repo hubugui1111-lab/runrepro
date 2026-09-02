@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 
+import pytest
+
 from runrepro.models import ReplayLock
-from runrepro.replay import ReplayOutcome, build_act_plan, classify_act_result
+from runrepro.replay import ReplayOutcome, build_act_plan, classify_act_result, run_act
 
 
 def _lock() -> ReplayLock:
@@ -62,7 +65,9 @@ def test_build_act_plan_blocks_ambient_secrets_host_network_and_docker_socket(
     assert argv[argv.index("--job") + 1] == "test"
     assert "python:3.12" in argv
     assert "os:ubuntu-latest" in argv
-    assert argv[argv.index("--network") + 1] == "bridge"
+    assert argv[argv.index("--network") + 1].startswith("runrepro-")
+    assert argv[argv.index("--network") + 1] not in {"host", "bridge", "none"}
+    assert plan.network_internal is False
     assert argv[argv.index("--container-daemon-socket") + 1] == "-"
     assert argv[argv.index("--secret-file") + 1].endswith(".empty")
     assert argv[argv.index("--env-file") + 1].endswith("replay.env")
@@ -77,9 +82,36 @@ def test_build_act_plan_blocks_ambient_secrets_host_network_and_docker_socket(
 def test_offline_plan_disables_network_and_pulls(tmp_path: Path) -> None:
     plan = build_act_plan(_lock(), tmp_path, act_executable="act", offline=True)
 
-    assert plan.argv[plan.argv.index("--network") + 1] == "none"
+    assert plan.argv[plan.argv.index("--network") + 1].startswith("runrepro-")
+    assert plan.network_internal is True
     assert "--action-offline-mode" in plan.argv
     assert "--pull=false" in plan.argv
+
+
+def test_run_act_creates_isolated_network_and_removes_it(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    calls: list[list[str]] = []
+    plan = build_act_plan(_lock(), tmp_path, act_executable="act")
+
+    def fake_which(name: str) -> str:
+        return f"/tools/{name}"
+
+    def fake_run(argv: list[str], **_: object) -> subprocess.CompletedProcess[bytes]:
+        calls.append(argv)
+        if argv[0].endswith("act"):
+            return subprocess.CompletedProcess(argv, 1, stdout=b"Failure - Run tests", stderr=b"")
+        return subprocess.CompletedProcess(argv, 0, stdout=b"network-id", stderr=b"")
+
+    monkeypatch.setattr("runrepro.replay.shutil.which", fake_which)
+    monkeypatch.setattr("runrepro.replay.subprocess.run", fake_run)
+
+    result = run_act(plan, ["Run tests"], timeout_seconds=30)
+
+    assert result.outcome is ReplayOutcome.REPRODUCED
+    assert calls[0][:4] == ["/tools/docker", "network", "create", "--driver"]
+    assert calls[0][-1] == plan.network_name
+    assert calls[-1] == ["/tools/docker", "network", "rm", plan.network_name]
 
 
 def test_classify_act_result_distinguishes_expected_failure_success_and_runner_error() -> None:
