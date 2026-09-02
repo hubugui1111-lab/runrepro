@@ -1,6 +1,6 @@
 # Reproduce the public demo
 
-The repository contains a manually triggered workflow named **RunRepro intentional failure demo**. It intentionally fails `Verify environment contract` after recording runner evidence. The job also has a static matrix and a Redis service, so one run exercises metadata collection, matrix inference, service discovery, log redaction, source pinning, and local replay.
+The repository contains a manually triggered workflow named **RunRepro intentional failure demo**. It intentionally fails `Verify environment contract` after recording runner evidence. The job has a static matrix, so one run exercises metadata collection, matrix inference, log redaction, source pinning, and local replay. Service-container diagnosis has a separate gallery fixture because `act` networking is not equivalent across Docker hosts.
 
 1. Open the workflow's latest failed run and copy its URL.
 2. Confirm Docker is running, `gh auth status` succeeds, and `act --version` works.

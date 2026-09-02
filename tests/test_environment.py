@@ -13,6 +13,23 @@ def test_parse_runner_log_extracts_evidenced_runner_image() -> None:
     assert snapshot.evidence == "job-log"
 
 
+def test_parse_runner_log_handles_real_actions_prefixes_and_image_group() -> None:
+    snapshot = parse_runner_log(
+        "2026-09-02T15:19:42.4552922Z ##[group]Runner Image Provisioner\n"
+        "2026-09-02T15:19:42.4554515Z Version: 20260819.586\n"
+        "2026-09-02T15:19:42.4561590Z ##[group]Runner Image\n"
+        "2026-09-02T15:19:42.4562132Z Image: ubuntu-24.04\n"
+        "2026-09-02T15:19:42.4562705Z Version: 20260823.283.1\n"
+        "2026-09-02T15:19:42.4563000Z ##[endgroup]\n"
+        "2026-09-02T15:19:44.8921902Z RUNREPRO_TOOL bash=5.2.21(1)-release\n"
+    )
+
+    assert snapshot.runner_image == "ubuntu-24.04"
+    assert snapshot.runner_image_version == "20260823.283.1"
+    assert snapshot.os == "Linux"
+    assert snapshot.tool_versions == {"bash": "5.2.21(1)-release"}
+
+
 def test_compare_environments_marks_mismatch_match_and_unknown() -> None:
     remote = EnvironmentSnapshot(
         os="Linux",

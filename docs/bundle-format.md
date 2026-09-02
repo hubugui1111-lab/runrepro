@@ -21,7 +21,7 @@ Important fields:
 - `jobs`: narrow job metadata and failed step names.
 - `artifacts`: names, IDs, sizes, expiry state, timestamps, and digest only; no bodies or download credentials.
 - `remote_environment`: facts evidenced in the log/workflow, with provenance.
-- `replay`: selected workflow job ID, statically inferred matrix values, and event name.
+- `replay`: selected workflow job ID, statically inferred matrix values, event name, and declared service names.
 - `fidelity`: human-readable evidence gaps that must not be mistaken for equivalence.
 
 Consumers should reject unknown schema versions. Within schema v1, new optional fields may be added; existing field meaning will not change. Bundle paths are always relative and cannot contain parent traversal.

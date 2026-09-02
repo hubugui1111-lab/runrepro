@@ -19,5 +19,6 @@ Reported but not faithfully replayed:
 - self-hosted, GPU, ARM-on-x64, or hardware-specific runners;
 - dynamic `fromJSON`, output-derived, `include`, or `exclude` matrix resolution;
 - private dependencies that require omitted credentials;
+- service-container networking that depends on host-mode or Docker-host-specific behavior;
 - GitHub service-plane behavior, environments, approvals, OIDC, and production secrets;
 - symlinks or very large repositories blocked by source-extraction safety bounds.

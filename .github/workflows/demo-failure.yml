@@ -15,11 +15,6 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-    services:
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
     env:
       EXPECTED_ENVIRONMENT: production
       ACTUAL_ENVIRONMENT: staging

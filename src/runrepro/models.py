@@ -59,6 +59,8 @@ class JobRef(_StrictModel):
     name: str
     conclusion: str | None
     runner_labels: list[str] = Field(default_factory=list)
+    runner_name: str | None = None
+    runner_group_name: str | None = None
     failed_steps: list[str] = Field(default_factory=list)
 
 
@@ -76,6 +78,7 @@ class ReplaySpec(_StrictModel):
     job_id: str
     matrix: dict[str, str] = Field(default_factory=dict)
     event: str
+    service_names: list[str] = Field(default_factory=list)
 
 
 class ReplayLock(_StrictModel):

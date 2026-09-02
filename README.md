@@ -152,7 +152,7 @@ Exit codes:
 - missing generated files;
 - service-container protocol mistakes.
 
-They are fixtures, not enabled CI workflows, so the repository's normal CI remains green. The separate `workflow_dispatch` demo is intentionally red by design.
+They are fixtures, not enabled CI workflows, so the repository's normal CI remains green. The separate `workflow_dispatch` demo combines a static matrix and environment-contract failure and is intentionally red by design.
 
 ## What gets captured — and what does not
 

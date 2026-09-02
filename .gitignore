@@ -9,8 +9,8 @@
 /build/
 /*.egg-info/
 /.runrepro/
+/.runrepro-*/
 __pycache__/
 *.py[cod]
 .env
 .secrets
-

@@ -9,6 +9,8 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 _TOOL_LINE = re.compile(r"(?m)^RUNREPRO_TOOL\s+(?P<name>[A-Za-z0-9_.-]+)=(?P<version>[^\s]+)\s*$")
+_ANSI = re.compile(r"\x1b\[[0-9;]*m")
+_ACTIONS_TIMESTAMP = re.compile(r"^\d{4}-\d{2}-\d{2}T\S+Z\s+")
 
 
 class EnvironmentSnapshot(BaseModel):
@@ -47,11 +49,16 @@ class EnvironmentReport(BaseModel):
 
 def parse_runner_log(log: str) -> EnvironmentSnapshot:
     """Extract only runner facts explicitly evidenced by a job log."""
-    image = _line_value(log, "Image")
-    image_version = _line_value(log, "Version")
-    architecture = _line_value(log, "Architecture")
+    normalized_lines = [_normalize_actions_line(line) for line in log.splitlines()]
+    image_lines = _runner_image_block(normalized_lines)
+    image = _line_value(image_lines, "Image")
+    image_version = _line_value(image_lines, "Version")
+    architecture = _line_value(image_lines, "Architecture")
     os_name = _os_from_image(image)
-    tools = {match.group("name"): match.group("version") for match in _TOOL_LINE.finditer(log)}
+    normalized_log = "\n".join(normalized_lines)
+    tools = {
+        match.group("name"): match.group("version") for match in _TOOL_LINE.finditer(normalized_log)
+    }
     return EnvironmentSnapshot(
         os=os_name,
         architecture=architecture,
@@ -116,9 +123,29 @@ def compare_environments(
     )
 
 
-def _line_value(log: str, label: str) -> str | None:
-    match = re.search(rf"(?m)^\s*{re.escape(label)}:\s*(?P<value>[^\r\n]+?)\s*$", log)
-    return match.group("value") if match else None
+def _normalize_actions_line(line: str) -> str:
+    return _ACTIONS_TIMESTAMP.sub("", _ANSI.sub("", line)).strip()
+
+
+def _runner_image_block(lines: list[str]) -> list[str]:
+    for index, line in enumerate(lines):
+        if line in {"Runner Image", "##[group]Runner Image"}:
+            block: list[str] = []
+            for candidate in lines[index + 1 :]:
+                if candidate == "##[endgroup]":
+                    break
+                block.append(candidate)
+            return block
+    return lines
+
+
+def _line_value(lines: list[str], label: str) -> str | None:
+    prefix = f"{label}:"
+    for line in lines:
+        if line.startswith(prefix):
+            value = line.removeprefix(prefix).strip()
+            return value or None
+    return None
 
 
 def _os_from_image(image: str | None) -> str | None:

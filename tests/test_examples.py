@@ -18,7 +18,7 @@ def test_every_shipped_workflow_fixture_is_safe_parseable() -> None:
         assert isinstance(workflow.get("jobs"), dict), path
 
 
-def test_public_demo_maps_to_static_matrix_and_service() -> None:
+def test_public_demo_maps_to_static_matrix_without_service_dependency() -> None:
     root = Path(__file__).parents[1]
     text = (root / ".github" / "workflows" / "demo-failure.yml").read_text(encoding="utf-8")
 
@@ -31,7 +31,7 @@ def test_public_demo_maps_to_static_matrix_and_service() -> None:
     assert selection.job_id == "replay-demo"
     assert selection.matrix == {"os": "ubuntu-latest"}
     assert selection.events == ["workflow_dispatch"]
-    assert selection.service_names == ["redis"]
+    assert selection.service_names == []
 
 
 def test_setup_uv_uses_the_published_release_tag() -> None:

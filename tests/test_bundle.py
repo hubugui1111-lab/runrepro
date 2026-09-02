@@ -42,6 +42,9 @@ def test_build_bundle_writes_stable_relative_secret_safe_files(
     assert lock.run.id == 424242
     assert lock.replay.job_id == "test"
     assert lock.replay.matrix == {"python": "3.12", "os": "ubuntu-latest"}
+    assert lock.replay.service_names == ["redis"]
+    assert lock.jobs[1].runner_name == "GitHub Actions 101"
+    assert lock.jobs[1].runner_group_name == "GitHub Actions"
     assert lock.workflow.path == "workflow/ci.yml"
     assert lock.logs == {"100": "logs/100.log", "101": "logs/101.log"}
     assert token not in lock_text

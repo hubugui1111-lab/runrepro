@@ -85,6 +85,7 @@ def build_bundle(collected: CollectedRun, target: Path) -> Path:
                 "job_id": selection.job_id,
                 "matrix": selection.matrix,
                 "event": _required_text(collected.run, "event"),
+                "service_names": selection.service_names,
             },
             "logs": {str(job_id): f"logs/{job_id}.log" for job_id in collected.job_logs},
             "fidelity": _fidelity_notes(selection.matrix_fidelity, remote_environment),
@@ -175,6 +176,8 @@ def _job_metadata(job: dict[str, Any]) -> dict[str, Any]:
         "runner_labels": [str(label) for label in job.get("labels", [])]
         if isinstance(job.get("labels"), list)
         else [],
+        "runner_name": _optional_text(job.get("runner_name")),
+        "runner_group_name": _optional_text(job.get("runner_group_name")),
         "failed_steps": failed_steps,
     }
 

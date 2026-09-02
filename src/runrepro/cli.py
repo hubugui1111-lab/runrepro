@@ -70,8 +70,18 @@ def inspect_command(
     typer.echo(f"Workflow: {lock.workflow.name} ({lock.workflow.path})")
     typer.echo(f"Replay job: {lock.replay.job_id}")
     typer.echo(f"Matrix: {json.dumps(lock.replay.matrix, sort_keys=True)}")
-    failed_steps = [step for job in lock.jobs for step in job.failed_steps]
+    failed_jobs = [
+        job for job in lock.jobs if job.conclusion in {"failure", "timed_out", "cancelled"}
+    ]
+    failed_steps = [step for job in failed_jobs for step in job.failed_steps]
+    runner_names = sorted({job.runner_name for job in failed_jobs if job.runner_name})
+    runner_groups = sorted({job.runner_group_name for job in failed_jobs if job.runner_group_name})
     typer.echo(f"Failed steps: {', '.join(failed_steps) if failed_steps else 'unknown'}")
+    typer.echo(f"Runner: {', '.join(runner_names) if runner_names else 'unknown'}")
+    typer.echo(f"Runner group: {', '.join(runner_groups) if runner_groups else 'unknown'}")
+    typer.echo(
+        f"Services: {', '.join(lock.replay.service_names) if lock.replay.service_names else 'none'}"
+    )
     typer.echo("Fidelity deltas:")
     for note in lock.fidelity:
         typer.echo(f"- {note}")
