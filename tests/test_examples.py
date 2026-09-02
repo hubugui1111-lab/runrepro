@@ -32,3 +32,10 @@ def test_public_demo_maps_to_static_matrix_and_service() -> None:
     assert selection.matrix == {"os": "ubuntu-latest"}
     assert selection.events == ["workflow_dispatch"]
     assert selection.service_names == ["redis"]
+
+
+def test_setup_uv_uses_the_published_release_tag() -> None:
+    root = Path(__file__).parents[1]
+    for name in ("ci.yml", "release.yml"):
+        text = (root / ".github" / "workflows" / name).read_text(encoding="utf-8")
+        assert "astral-sh/setup-uv@v10.0.1" in text
