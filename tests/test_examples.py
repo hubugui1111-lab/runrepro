@@ -39,3 +39,10 @@ def test_setup_uv_uses_the_published_release_tag() -> None:
     for name in ("ci.yml", "release.yml"):
         text = (root / ".github" / "workflows" / name).read_text(encoding="utf-8")
         assert "astral-sh/setup-uv@v10.0.1" in text
+
+
+def test_release_job_identifies_repository_without_checkout() -> None:
+    root = Path(__file__).parents[1]
+    text = (root / ".github" / "workflows" / "release.yml").read_text(encoding="utf-8")
+
+    assert "GH_REPO: ${{ github.repository }}" in text
