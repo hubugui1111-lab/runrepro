@@ -1,0 +1,70 @@
+name: Rust Vega Offline Bundle
+
+on:
+  push:
+    branches: [rust-offline-bundle]
+    paths:
+      - '.github/workflows/rust-offline-bundle.yml'
+  workflow_dispatch:
+
+jobs:
+  bundle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Record toolchain
+        run: |
+          rustc -Vv
+          cargo -V
+          rustc --print sysroot
+
+      - name: Resolve and vendor public dependencies
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mkdir -p /tmp/vega-offline/src /tmp/vega-offline/.cargo
+          cat > /tmp/vega-offline/Cargo.toml <<'TOML'
+          [package]
+          name = "vega-offline-seed"
+          version = "0.1.0"
+          edition = "2024"
+          publish = false
+
+          [dependencies]
+          vega-prover = { git = "https://github.com/microsoft/vega-prover", rev = "c0ee259053cd12eaf43ed71b5cde375452b3ee4d" }
+          bellpepper-core = "0.4.0"
+          ff = "0.13"
+          bincode = "1.3"
+          serde_json = "1"
+          TOML
+          echo 'fn main() {}' > /tmp/vega-offline/src/main.rs
+          cd /tmp/vega-offline
+          cargo generate-lockfile
+          cargo vendor vendor > .cargo/config.toml
+          CARGO_NET_OFFLINE=true cargo check --offline
+
+      - name: Assemble portable local bundle
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mkdir -p offline-bundle/toolchain offline-bundle/project
+          SYSROOT="$(rustc --print sysroot)"
+          cp -a "$SYSROOT/bin" offline-bundle/toolchain/
+          cp -a "$SYSROOT/lib" offline-bundle/toolchain/
+          cp -a /tmp/vega-offline/Cargo.toml /tmp/vega-offline/Cargo.lock offline-bundle/project/
+          cp -a /tmp/vega-offline/.cargo offline-bundle/project/
+          cp -a /tmp/vega-offline/vendor offline-bundle/project/
+          du -sh offline-bundle/toolchain offline-bundle/project
+          printf 'sysroot=%s\n' "$SYSROOT" > offline-bundle/manifest.txt
+          rustc -Vv >> offline-bundle/manifest.txt
+          cargo -V >> offline-bundle/manifest.txt
+
+      - name: Upload offline bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: rust-vega-offline-bundle
+          path: offline-bundle
+          compression-level: 6
+          retention-days: 1
